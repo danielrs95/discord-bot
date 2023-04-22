@@ -31,6 +31,7 @@ yarn-error.log*
 
 #JetBrains IDE
 .idea
+.env
 
 #amplify-do-not-edit-begin
 amplify/\#current-cloud-backend
