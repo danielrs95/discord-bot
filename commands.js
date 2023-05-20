@@ -1,5 +1,5 @@
-import "dotenv/config";
-import { capitalize, InstallGlobalCommands } from "./utils.js";
+require("dotenv").config();
+const { capitalize, InstallGlobalCommands } = require("./utils.js");
 
 // Simple test command
 const TEST_COMMAND = {

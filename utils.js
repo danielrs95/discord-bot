@@ -1,7 +1,7 @@
-import { verifyKey } from "discord-interactions";
-import("dotenv").then((dotenv) => dotenv.config());
+const { verifyKey } = require("discord-interactions");
+require("dotenv").config();
 
-export function VerifyDiscordRequest(clientKey) {
+function VerifyDiscordRequest(clientKey) {
   return function (req, res, buf, encoding) {
     const signature = req.get("X-Signature-Ed25519");
     const timestamp = req.get("X-Signature-Timestamp");
@@ -14,8 +14,8 @@ export function VerifyDiscordRequest(clientKey) {
   };
 }
 
-export async function DiscordRequest(endpoint, options) {
-  const { default: fetch } = await import("node-fetch");
+async function DiscordRequest(endpoint, options) {
+  const fetch = (await import("node-fetch")).default;
   const url = "https://discord.com/api/v10/" + endpoint;
   if (options.body) options.body = JSON.stringify(options.body);
 
@@ -38,7 +38,7 @@ export async function DiscordRequest(endpoint, options) {
   return res;
 }
 
-export async function InstallGlobalCommands(appId, commands) {
+async function InstallGlobalCommands(appId, commands) {
   const endpoint = `applications/${appId}/commands`;
   try {
     await DiscordRequest(endpoint, { method: "PUT", body: commands });
@@ -47,7 +47,7 @@ export async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-export function getRandomEmoji() {
+function getRandomEmoji() {
   const emojiList = [
     "😭",
     "😄",
@@ -67,6 +67,14 @@ export function getRandomEmoji() {
   return emojiList[Math.floor(Math.random() * emojiList.length)];
 }
 
-export function capitalize(str) {
+function capitalize(str) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+module.exports = {
+  VerifyDiscordRequest,
+  DiscordRequest,
+  InstallGlobalCommands,
+  getRandomEmoji,
+  capitalize,
+};
