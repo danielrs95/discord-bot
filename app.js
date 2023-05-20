@@ -1,20 +1,18 @@
-require("dotenv").config();
-const express = require("express");
-const {
+import("dotenv").then((dotenv) => dotenv.config());
+import express from "express";
+import {
   InteractionType,
   InteractionResponseType,
   InteractionResponseFlags,
   MessageComponentTypes,
   ButtonStyleTypes,
-} = require("discord-interactions");
-const {
+} from "discord-interactions";
+import {
   VerifyDiscordRequest,
   getRandomEmoji,
   DiscordRequest,
-} = require("./utils.js");
-const Discord = require("discord.js");
-
-const { Client, Collection, Events, GatewayIntentBits } = Discord;
+} from "./utils.js";
+import { Client, Collection, Events, GatewayIntentBits } from "discord.js";
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 // Log in to Discord with your client's token
