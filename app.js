@@ -3,10 +3,9 @@ const express = require("express");
 const {
   InteractionType,
   InteractionResponseType,
-  InteractionResponseFlags,
   MessageComponentTypes,
-  ButtonStyleTypes,
 } = require("discord-interactions");
+
 const {
   VerifyDiscordRequest,
   getRandomEmoji,
@@ -14,29 +13,21 @@ const {
 } = require("./utils.js");
 const Discord = require("discord.js");
 
-const { Client, Collection, Events, GatewayIntentBits } = Discord;
+const { Client, GatewayIntentBits } = Discord;
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
 // Log in to Discord with your client's token
 client.login(process.env.DISCORD_TOKEN);
+
 // Create an express app
 const app = express();
+
 // Get port, or default to 3000
 const PORT = process.env.PORT || 3000;
-// Parse request body and verifies incoming requests using discord-interactions package
+
+// Parse request body and verify incoming requests using the discord-interactions package
 app.use(express.json({ verify: VerifyDiscordRequest(process.env.PUBLIC_KEY) }));
-
-// Assumamos que tienes una lista de emojis
-const emojiList = ["emoji1", "emoji2", "emoji3", "..."];
-
-// Entonces puedes crear las opciones para el menú de selección
-const emojiOptions = emojiList.map((emoji, index) => {
-  return {
-    label: emoji,
-    value: emoji,
-    description: `Filtrar por ${emoji}`,
-  };
-});
 
 /**
  * Interactions endpoint URL where Discord will send HTTP requests
@@ -62,7 +53,7 @@ app.post("/interactions", async function (req, res) {
 
     // "test" command
     if (name === "test") {
-      // Send a message into the channel where command was triggered from
+      // Send a message into the channel where the command was triggered from
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
@@ -73,10 +64,10 @@ app.post("/interactions", async function (req, res) {
     }
 
     // "filter" command
-    if (name === "filter" && id) {
+    if (name === "filtrar" && id) {
       const userId = req.body.member.user.id;
+      // Server === guild
       const guildId = req.body.guild_id;
-
       const guild = client.guilds.cache.get(guildId);
 
       const channelPromises = guild.channels.cache.map(async (channel) => {
@@ -84,17 +75,17 @@ app.post("/interactions", async function (req, res) {
           const messages = await channel.messages.fetch({ limit: 100 });
 
           const reactionPromises = messages.map(async (message) => {
-            // Itera sobre los values del objeto reactions
+            // Iterate over the values of the reactions object
             for (const reaction of message.reactions.cache.values()) {
               if (reaction.emoji.name === "pepenoted") {
                 const usersWhoReacted = await reaction.users.fetch();
 
-                // Si tiene el emoji, agregar al array
+                // If the user has reacted with the emoji, add it to the array
                 if (usersWhoReacted.has(userId)) {
                   let url = `https://discord.com/channels/${guildId}/${message.channelId}/${message.id}`;
 
                   response.push({
-                    // Elimina \n y limita longitud a 100 caracteres
+                    // Remove \n (next line) and limit length to 100 characters
                     content:
                       message.content.replace(/\n/g, " ").substring(0, 97) +
                       "...",
@@ -105,12 +96,12 @@ app.post("/interactions", async function (req, res) {
             }
           });
 
-          // Resolver todas las promesas
+          // Resolve all promises
           await Promise.all(reactionPromises);
         }
       });
 
-      // Resolver todas las promesas
+      // Resolve all promises
       await Promise.all(channelPromises);
 
       const options = response.map((message, index) => {
@@ -126,7 +117,7 @@ app.post("/interactions", async function (req, res) {
       return res.send({
         type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
         data: {
-          content: `Filtrando mensajes con :pepenoted: de <@${userId}>`,
+          content: `Filtrar mensajes a los que reaccionaste con emoji :pepenoted:`,
           components: [
             {
               type: MessageComponentTypes.ACTION_ROW,
@@ -156,12 +147,19 @@ app.post("/interactions", async function (req, res) {
     if (componentId === "my_select") {
       // Get selected option from payload
       const selectedOption = data.values[0];
+      const endpoint = `webhooks/${process.env.APP_ID}/${req.body.token}/messages/${req.body.message.id}`;
 
       // Send results
-      return res.send({
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data: { content: `${selectedOption}` },
-      });
+      try {
+        await res.send({
+          type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+          data: { content: `${selectedOption}` },
+        });
+        // Delete previous message with select options
+        await DiscordRequest(endpoint, { method: "DELETE" });
+      } catch (err) {
+        console.error("Error sending message:", err);
+      }
     }
   }
 });
