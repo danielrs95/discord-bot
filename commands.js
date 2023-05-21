@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { capitalize, InstallGlobalCommands } = require("./utils.js");
+const { InstallGlobalCommands } = require("./utils.js");
 
 // Simple test command
 const TEST_COMMAND = {
@@ -10,8 +10,8 @@ const TEST_COMMAND = {
 
 // Command containing options
 const FILTER_COMMAND = {
-  name: "filter",
-  description: "Filter by emoji",
+  name: "filtrar",
+  description: "Filtrar mensajes a los que reaccionaste con emoji :pepenoted:",
   type: 1,
 };
 

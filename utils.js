@@ -47,34 +47,8 @@ async function InstallGlobalCommands(appId, commands) {
   }
 }
 
-function getRandomEmoji() {
-  const emojiList = [
-    "😭",
-    "😄",
-    "😌",
-    "🤓",
-    "😎",
-    "😤",
-    "🤖",
-    "😶‍🌫️",
-    "🌏",
-    "📸",
-    "💿",
-    "👋",
-    "🌊",
-    "✨",
-  ];
-  return emojiList[Math.floor(Math.random() * emojiList.length)];
-}
-
-function capitalize(str) {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}
-
 module.exports = {
   VerifyDiscordRequest,
   DiscordRequest,
   InstallGlobalCommands,
-  getRandomEmoji,
-  capitalize,
 };
